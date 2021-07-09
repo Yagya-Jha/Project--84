@@ -5,14 +5,17 @@ import * as Font from 'expo-font';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RFValue } from 'react-native-responsive-fontsize';
 import Ionicons from 'react-native-vector-icons/Ionicons'
+import StackNavigator from '../Navigators/StackNavigator'
 
 let custom_font = {'Bubblegum-Sans':require('../assets/fonts/BubblegumSans-Regular.ttf')}
 
-export default class PostCard extends React.Component{
+export default class PostScreen extends React.Component{
     constructor(){
         super();
         this.state = {
             fontsLoaded: false,
+            speakerColor: 'gray',
+            speakerIcon: 'volume-high-outline',
         };
     }
     async loadFonts(){
@@ -24,10 +27,23 @@ export default class PostCard extends React.Component{
         this.loadFonts();
     }
 
+  async initiateTTS(title, author, caption, created_on){
+      const currentColor = this.state.speakerColor;
+      this.setState({speakerColor: currentColor==='gray'?'#ee8249':'gray'});
+      if(currentColor === 'grey'){
+          Speech.speak(title + 'by' + author);
+          Speech.speak(caption);
+          Speech.speak("Post created on");
+          Speech.speak(created_on);
+      }else{
+          Speech.stop();
+      }
+  }
+
     render(){
-        if(! this.props.route.params){
-            this.props.navigation.navigate('Home');
-        }else if(! this.state.fontsLoaded){
+      if(! this.props.route.params){
+        this.props.navigation.navigate('Home');
+    }else if(! this.state.fontsLoaded){
             return <AppLoading />
         }
         else{
@@ -37,7 +53,7 @@ export default class PostCard extends React.Component{
                         <View style = {styles.profile}>
                         <Image source = {require('../assets/profile_img.png')} style = {styles.profileImage} />
                         <Text style = {[styles.titleText, {marginLeft: 60, bottom: 50}]}>
-                                {this.props.post.author}
+                                {this.props.route.params.post.author}
                         </Text>
                         </View>
                         <View style = {styles.postContainer}>
@@ -46,9 +62,8 @@ export default class PostCard extends React.Component{
                             <View style = {styles.dataContainer}>
                                 <View style = {styles.titleTextContainer}>
                                     <Text style = {styles.postTitleText}>{this.props.route.params.post.title}</Text>
-                                    <Text style = {styles.postAuthorText}>{this.props.route.params.post.author}</Text>
-                                    <Text style = {styles.postTitleText}>{this.props.route.params.post.created_on}</Text>
                                     <Text style = {styles.postTitleText}>{this.props.route.params.post.caption}</Text>
+                                    <Text style = {styles.postTitleText}>{this.props.route.params.post.created_on}</Text>
                                 </View>
                                 <View style = {styles.iconContainer}>
                                     <TouchableOpacity onPress = {()=>{this.initiateTTS(
